@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎨 Canvas Manager - Sube tus Canvas</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>🎨 Canvas Manager</h1>
+            <p class="subtitle">Sube y gestiona tus Canvas para OpenTune</p>
+        </header>
+
+        <!-- FORMULARIO DE SUBIDA -->
+        <section class="upload-section">
+            <h2>📤 Subir nuevo Canvas</h2>
+            <form id="uploadForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="artist">Artista *</label>
+                        <input type="text" id="artist" placeholder="Ej: SZA" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="album">Álbum *</label>
+                        <input type="text" id="album" placeholder="Ej: SOS" required />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="song">Canción *</label>
+                        <input type="text" id="song" placeholder="Ej: Kill Bill" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="videoFile">Archivo de video *</label>
+                        <input type="file" id="videoFile" accept="video/mp4,video/webm" required />
+                    </div>
+                </div>
+                <button type="submit" id="uploadBtn">🚀 Subir Canvas</button>
+            </form>
+            <div id="uploadMessage" class="message"></div>
+        </section>
+
+        <!-- LISTA DE CANVAS -->
+        <section class="list-section">
+            <h2>📋 Canvas Subidos</h2>
+            <div id="loading">Cargando...</div>
+            <div id="canvasList" style="display: none;">
+                <table id="canvasTable">
+                    <thead>
+                        <tr>
+                            <th>Artista</th>
+                            <th>Álbum</th>
+                            <th>Canción</th>
+                            <th>URL</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="canvasTableBody"></tbody>
+                </table>
+            </div>
+            <div id="emptyMessage" style="display: none;">
+                <p>No hay Canvas subidos todavía. ¡Sé el primero!</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
