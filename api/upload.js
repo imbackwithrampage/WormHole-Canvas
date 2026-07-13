@@ -1,7 +1,7 @@
 // api/upload.js
 import { put, list } from '@vercel/blob';
 
-// 🔧 Helper: Generar ID único (con canción opcional)
+// 🔧 Helper: Generate unique ID (with optional song)
 function generateId(artist, album, song) {
     const clean = (str) => str
         .toLowerCase()
@@ -17,26 +17,26 @@ function generateId(artist, album, song) {
     return result;
 }
 
-// 🔧 Helper: Obtener extensión del archivo
+// 🔧 Helper: Get file extension
 function getFileExtension(filename) {
     const parts = filename.split('.');
     return parts.length > 1 ? parts.pop().toLowerCase() : 'mp4';
 }
 
-// 📤 Handler principal
+// 📤 Main handler
 export default async function handler(req, res) {
     console.log('📤 Upload function called');
     
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Método no permitido. Usa POST.' });
+        return res.status(405).json({ error: 'Method Not Allowed. Use POST.' });
     }
 
     try {
         if (!process.env.BLOB_READ_WRITE_TOKEN) {
-            console.error('❌ Falta BLOB_READ_WRITE_TOKEN');
+            console.error('❌ Missing BLOB_READ_WRITE_TOKEN');
             return res.status(500).json({
                 success: false,
-                error: 'Configuración de Blob Storage incompleta'
+                error: 'Blob Storage configuration is incomplete'
             });
         }
 
@@ -45,50 +45,50 @@ export default async function handler(req, res) {
         console.log('📤 Fields:', Object.keys(fields));
         console.log('📤 Files:', Object.keys(files));
 
-        // ✅ Artist y album son obligatorios, song es opcional
+        // ✅ Artist and album are required, song is optional
         if (!fields.artist || !fields.album) {
             return res.status(400).json({
                 success: false,
-                error: 'Faltan campos requeridos: artist, album (song es opcional)'
+                error: 'Missing required fields: artist, album (song is optional)'
             });
         }
 
         if (!files.video) {
             return res.status(400).json({
                 success: false,
-                error: 'Falta el archivo de video'
+                error: 'Missing video file'
             });
         }
 
-        // ✅ Validar tamaño (6MB máximo)
+        // ✅ Validate size (6MB maximum)
         if (files.video.size > 6 * 1024 * 1024) {
             return res.status(400).json({
                 success: false,
-                error: 'El archivo de video debe ser menor a 6MB'
+                error: 'The video file must be less than 6MB'
             });
         }
 
         const artist = fields.artist.trim();
         const album = fields.album.trim();
-        const song = fields.song ? fields.song.trim() : ''; // ✅ Opcional
+        const song = fields.song ? fields.song.trim() : ''; // ✅ Optional
         const videoFile = files.video;
 
-        console.log('📤 Procesando:', { artist, album, song: song || '(sin canción)', filename: videoFile.filename });
+        console.log('📤 Processing:', { artist, album, song: song || '(no song)', filename: videoFile.filename });
 
         const id = generateId(artist, album, song);
         const fileExt = getFileExtension(videoFile.filename);
         const fileName = `canvases/${id}.${fileExt}`;
 
-        // 📤 Guardar en Vercel Blob
+        // 📤 Save to Vercel Blob
         const fileBuffer = Buffer.from(videoFile.content, 'base64');
         const blob = await put(fileName, fileBuffer, {
             access: 'public',
             contentType: videoFile.contentType || 'video/mp4'
         });
 
-        console.log('✅ Archivo guardado:', blob.url);
+        console.log('✅ File saved:', blob.url);
 
-        // 📝 Leer índice actual
+        // 📝 Read current index
         let indexData = { canvases: [] };
         try {
             const blobs = await list({ prefix: 'canvases/' });
@@ -97,19 +97,19 @@ export default async function handler(req, res) {
                 const response = await fetch(indexBlob.url);
                 if (response.ok) {
                     indexData = await response.json();
-                    console.log('📖 Índice cargado:', indexData.canvases.length);
+                    console.log('📖 Loaded index:', indexData.canvases.length);
                 }
             }
         } catch (e) {
-            console.log('📝 Creando nuevo índice...');
+            console.log('📝 Creating new index...');
         }
 
-        // Crear entrada
+        // Create entry
         const newEntry = {
             id: id,
             artist: artist,
             album: album,
-            song: song || '', // ✅ Guardar vacío si no hay canción
+            song: song || '', // ✅ Save empty if there is no song
             url: blob.url,
             type: fileExt,
             uploadedAt: new Date().toISOString()
@@ -118,19 +118,19 @@ export default async function handler(req, res) {
         const existingIndex = indexData.canvases.findIndex(c => c.id === id);
         if (existingIndex !== -1) {
             indexData.canvases[existingIndex] = { ...newEntry, updatedAt: new Date().toISOString() };
-            console.log('🔄 Actualizando entrada existente');
+            console.log('🔄 Updating existing entry');
         } else {
             indexData.canvases.push(newEntry);
-            console.log('➕ Nueva entrada agregada');
+            console.log('➕ New entry added');
         }
 
-        // Guardar índice actualizado
+        // Save updated index
         await put('canvases/index.json', JSON.stringify(indexData, null, 2), {
             access: 'public',
             contentType: 'application/json'
         });
 
-        console.log('💾 Índice guardado');
+        console.log('💾 Index saved');
 
         return res.status(200).json({
             success: true,
@@ -139,19 +139,19 @@ export default async function handler(req, res) {
             artist: artist,
             album: album,
             song: song || '',
-            message: 'Canvas subido correctamente'
+            message: 'Canvas uploaded successfully'
         });
 
     } catch (error) {
-        console.error('❌ Error en upload:', error);
+        console.error('❌ Error in upload:', error);
         return res.status(500).json({
             success: false,
-            error: 'Error interno: ' + error.message
+            error: 'Internal error: ' + error.message
         });
     }
 }
 
-// 🔧 Función para parsear multipart/form-data
+// 🔧 Function to parse multipart/form-data
 async function parseMultipartFormData(req) {
     const fields = {};
     const files = {};
@@ -169,7 +169,7 @@ async function parseMultipartFormData(req) {
     const contentType = req.headers['content-type'] || '';
     const boundaryMatch = contentType.match(/boundary=([^;]+)/);
     if (!boundaryMatch) {
-        throw new Error('No se encontró boundary en Content-Type');
+        throw new Error('Boundary not found in Content-Type');
     }
 
     const boundary = boundaryMatch[1];

@@ -1,8 +1,8 @@
 /* ============================================================
-   OPENTUNE CANVAS STUDIO
-   Sistema de diseño — "Studio Deck"
-   Tema oscuro inspirado en consolas de audio y decks de cinta,
-   construido para gestionar los Canvas animados de OpenTune.
+   WORMHOLE CANVAS STUDIO
+   Design System — "Studio Deck"
+   Dark theme inspired by audio consoles and tape decks,
+   built to manage the animated canvases of WormHole.
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -42,9 +42,9 @@
     --error: #f76a63;
     --error-dim: rgba(247, 106, 99, 0.14);
 
-    /* ---------- Alias de compatibilidad ----------
-       script.js escribe estas variables directamente en
-       estilos inline; se mantienen para no romper nada. */
+    /* ---------- Compatibility Aliases ----------
+       script.js writes these variables directly in
+       inline styles; they are kept so as not to break anything. */
     --md-primary: var(--indigo);
     --md-primary-container: var(--surface-4);
     --md-on-primary-container: var(--text);

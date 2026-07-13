@@ -1,126 +1,126 @@
 # Canvas Studio 🎨
 
-**Canvas Studio for OpenTune** — Una plataforma web para subir y gestionar videos animados (Canvas) diseñada para integrarse con la aplicación OpenTune.
+**Canvas Studio for WormHole** — A web platform to upload and manage animated looping videos (Canvas) designed to integrate with the WormHole application.
 
 ---
 
-## 📋 Descripción
+## 📋 Description
 
-Canvas Studio es una **Web API** que permite:
+Canvas Studio is a **Web API** that allows you to:
 
-- 📤 **Subir videos animados** (MP4, WebM) asociados a canciones
-- 🔍 **Buscar Canvas** por artista, álbum y canción
-- 📋 **Gestionar** tu colección de Canvas (listar, eliminar)
-- 🔌 **Integrarse** con OpenTune a través de una API REST
-- 🎬 **Reproducir** los Canvas directamente desde la app
+- 📤 **Upload animated videos** (MP4, WebM) associated with songs
+- 🔍 **Search for Canvases** by artist, album, and song
+- 📋 **Manage** your Canvas collection (list, delete)
+- 🔌 **Integrate** with WormHole via a REST API
+- 🎬 **Play** the Canvases directly within the app
 
-Es la solución perfecta para ampliar la biblioteca de Canvas de OpenTune con contenido personalizado o creado por la comunidad.
-
----
-
-## 🚀 Características Principales
-
-### 1. API REST Completa
-- Endpoints para búsqueda, subida y gestión de Canvas
-- Respuestas en JSON con formato claro
-- Caché integrada para reducir llamadas repetidas
-
-### 2. Almacenamiento en la Nube
-- Videos alojados en **Vercel Blob Storage**
-- Acceso público para reproducción directa
-- Índice en JSON para búsqueda rápida
-
-### 3. Búsqueda Flexible
-- Búsqueda por **Artista + Álbum** (recomendado)
-- Búsqueda por **Artista + Álbum + Canción**
-- Búsqueda por **Artista** o **Álbum** individual
-- Coincidencia parcial para mayor precisión
-
-### 4. Interfaz Web
-- Panel de administración visual
-- Subida de archivos con arrastrar y soltar
-- Vista previa de los Canvas subidos
-- Copiar URL y eliminar directamente desde la web
-
-### 5. Integración OpenTune
-- Compatible con el sistema de proveedores de Canvas
-- Orden de búsqueda: Apple Music → Canvas Studio → Tidal
-- Retorna URLs directas para reproducción en ExoPlayer
+It is the perfect solution to expand WormHole's Canvas library with custom or community-created content.
 
 ---
 
-## 🛠 Stack Tecnológico
+## 🚀 Key Features
+
+### 1. Complete REST API
+- Endpoints for searching, uploading, and managing Canvases
+- JSON responses with clean formatting
+- Integrated caching to reduce repeated calls
+
+### 2. Cloud Storage
+- Videos hosted on **Vercel Blob Storage**
+- Public access for direct playback
+- JSON index for fast searches
+
+### 3. Flexible Search
+- Search by **Artist + Album** (recommended)
+- Search by **Artist + Album + Song**
+- Search by **Artist** or **Album** individually
+- Partial matching for higher accuracy
+
+### 4. Web Interface
+- Visual administration panel
+- Drag and drop file upload
+- Preview of uploaded Canvases
+- Copy URL and delete directly from the web
+
+### 5. WormHole Integration
+- Compatible with the Canvas provider system
+- Search order: Apple Music → Canvas Studio → Tidal
+- Returns direct URLs for playback in ExoPlayer
+
+---
+
+## 🛠 Tech Stack
 
 - **Frontend**: HTML5, CSS3, JavaScript
 - **Backend**: Vercel Serverless Functions (Node.js)
-- **Almacenamiento**: Vercel Blob Storage
+- **Storage**: Vercel Blob Storage
 - **CDN**: Vercel Edge Network
 
 ---
 
-## 🎯 Uso Rápido
+## 🎯 Quick Start
 
-### Buscar un Canvas (API)
+### Search for a Canvas (API)
 
 ```bash
-# Por artista + álbum
-curl "https://opentune-canvas.vercel.app/api/search?artist=Peso%20Pluma&album=DINAST%C3%8DA"
+# By artist + album
+curl "https://wormhole-canvas.vercel.app/api/search?artist=Peso%20Pluma&album=DINAST%C3%8DA"
 
-# Por artista + álbum + canción
-curl "https://opentune-canvas.vercel.app/api/search?artist=SZA&album=SOS&song=Kill%20Bill"
+# By artist + album + song
+curl "https://wormhole-canvas.vercel.app/api/search?artist=SZA&album=SOS&song=Kill%20Bill"
 ```
 
-### Subir un Canvas (API)
+### Upload a Canvas (API)
 
 ```bash
-curl -X POST "https://opentune-canvas.vercel.app/api/upload" \
+curl -X POST "https://wormhole-canvas.vercel.app/api/upload" \
   -F "artist=SZA" \
   -F "album=SOS" \
   -F "song=Kill Bill" \
-  -F "video=@/ruta/a/tu/video.mp4"
+  -F "video=@/path/to/your/video.mp4"
 ```
 
-### Desde la Web
+### From the Web
 
-1. Visita [https://opentune-canvas.vercel.app](https://opentune-canvas.vercel.app)
-2. Completa los campos: Artista, Álbum y Canción (opcional)
-3. Selecciona tu archivo de video (máx. 6MB)
-4. Haz clic en "Subir Canvas"
-5. El Canvas aparecerá en la lista y estará disponible para OpenTune
+1. Visit [https://wormhole-canvas.vercel.app](https://wormhole-canvas.vercel.app)
+2. Complete the fields: Artist, Album, and Song (optional)
+3. Select your video file (max. 6MB)
+4. Click on "Upload Canvas"
+5. The Canvas will appear in the list and be available for WormHole
 
 ---
 
 ## 📡 API Endpoints
 
-### Listar Canvas
+### List Canvases
 ```
 GET /api/list
 ```
-Devuelve todos los Canvas almacenados.
+Returns all stored Canvases.
 
-### Buscar Canvas
+### Search Canvas
 ```
 GET /api/search?artist=X&album=Y&song=Z
 ```
-Busca Canvas por parámetros. Artista y álbum son recomendados, canción es opcional.
+Searches Canvases by parameters. Artist and album are recommended, song is optional.
 
-### Subir Canvas
+### Upload Canvas
 ```
 POST /api/upload
 ```
-Sube un nuevo Canvas. Body: multipart/form-data con `artist`, `album`, `song` (opcional) y `video`.
+Uploads a new Canvas. Body: multipart/form-data with `artist`, `album`, `song` (optional), and `video`.
 
-### Eliminar Canvas
+### Delete Canvas
 ```
 DELETE /api/delete
 ```
-Elimina un Canvas por ID. Body JSON: `{ "id": "sza_sos_kill_bill" }`
+Deletes a Canvas by ID. Body JSON: `{ "id": "sza_sos_kill_bill" }`
 
 ---
 
-## 📦 Estructura de Datos
+## 📦 Data Structure
 
-### Respuesta de Búsqueda (encontrado)
+### Search Response (Found)
 ```json
 {
   "success": true,
@@ -137,7 +137,7 @@ Elimina un Canvas por ID. Body JSON: `{ "id": "sza_sos_kill_bill" }`
 }
 ```
 
-### Respuesta de Búsqueda (no encontrado)
+### Search Response (Not Found)
 ```json
 {
   "success": true,
@@ -148,54 +148,54 @@ Elimina un Canvas por ID. Body JSON: `{ "id": "sza_sos_kill_bill" }`
 
 ---
 
-## 🔧 Integración con OpenTune
+## 🔧 Integration with WormHole
 
-Canvas Studio se integra como un proveedor más en el sistema de Canvas de OpenTune. El orden de búsqueda es:
+Canvas Studio integrates as another provider in WormHole's Canvas system. The search order is:
 
-1. **Apple Music** (carátulas animadas oficiales)
-2. **Canvas Studio** (tu contenido personalizado)
+1. **Apple Music** (official animated covers)
+2. **Canvas Studio** (your custom content)
 3. **Tidal** (fallback)
 
-### Cómo funciona:
-1. OpenTune solicita un Canvas para una canción
-2. Busca primero en Apple Music
-3. Si no encuentra, consulta Canvas Studio
-4. Si no encuentra, prueba Tidal
-5. Devuelve la URL del Canvas (o null)
+### How it works:
+1. WormHole requests a Canvas for a song
+2. Searches first on Apple Music
+3. If not found, queries Canvas Studio
+4. If not found, tries Tidal
+5. Returns the Canvas URL (or null)
 
 ---
 
-## 🚀 Despliegue
+## 🚀 Deployment
 
-El proyecto está desplegado en [Vercel](https://vercel.com) con:
+The project is deployed on [Vercel](https://vercel.com) with:
 
-1. **Frontend** en la raíz del proyecto
-2. **Serverless Functions** en la carpeta `/api`
-3. **Blob Storage** para almacenar videos e índice
+1. **Frontend** in the project root
+2. **Serverless Functions** in the `/api` folder
+3. **Blob Storage** to store videos and the index
 
-### Variables de Entorno
-- `BLOB_READ_WRITE_TOKEN` — Token para Vercel Blob Storage
-- `BLOB_STORE_ID` — ID de la store (autogenerado)
-- `BLOB_WEBHOOK_PUBLIC_KEY` — Clave para webhooks (autogenerado)
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia MIT — ver el archivo [LICENSE](LICENSE) para más detalles.
+### Environment Variables
+- `BLOB_READ_WRITE_TOKEN` — Token for Vercel Blob Storage
+- `BLOB_STORE_ID` — Store ID (auto-generated)
+- `BLOB_WEBHOOK_PUBLIC_KEY` — Webhook public key (auto-generated)
 
 ---
 
-## 💬 Soporte
+## 📄 License
 
-¿Preguntas o problemas? Abre un [issue](https://github.com/Arturo254/Canvas-Artwork/issues) o contacta al equipo de desarrollo.
-
----
-
-## 🎨 Créditos
-
-Creado por **Arturo254** | OpenTune Canvas Studio
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Última actualización**: 2026-07-13
+## 💬 Support
+
+Questions or issues? Open an [issue](https://github.com/Arturo254/Canvas-Artwork/issues) or contact the development team.
+
+---
+
+## 🎨 Credits
+
+Created by **Arturo254** | WormHole Canvas Studio
+
+---
+
+**Last updated**: 2026-07-13

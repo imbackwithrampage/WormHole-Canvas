@@ -1,0 +1,21 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "opentune-canvas.vercel.app"
+        }
+      ],
+      "destination": "https://wormhole-canvas.vercel.app/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/blob/:path*",
+      "destination": "/api/blob?path=:path*"
+    }
+  ]
+}

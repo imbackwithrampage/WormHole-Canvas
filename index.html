@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Canvas Studio · OpenTune</title>
+    <title>Canvas Studio · WormHole</title>
     <meta name="color-scheme" content="dark" />
 
     <!-- Tailwind CSS -->
@@ -47,7 +47,7 @@
         <header class="studio-header">
             <div class="eyebrow">
                 <span class="dot"></span>
-                OpenTune Canvas
+                WormHole Canvas
             </div>
             <div class="brand-row">
                 <span class="eq"
@@ -55,33 +55,33 @@
                 <h1>Canvas <span class="accent">Studio</span></h1>
             </div>
             <p class="subtitle">
-                Sube y administra los videos en bucle que se reproducen detrás de la portada de cada canción.
+                Upload and manage looping videos that play behind the cover art of each song.
             </p>
         </header>
 
         <!-- ============================================
-        FORMULARIO DE SUBIDA
+        UPLOAD FORM
         ============================================ -->
         <section class="panel">
             <div class="panel-head">
                 <span class="panel-icon"><ion-icon name="cloud-upload-outline"></ion-icon></span>
-                <h2>Subir nuevo Canvas</h2>
+                <h2>Upload new Canvas</h2>
                 <span class="spacer"></span>
                 <span class="badge amber">
                     <ion-icon name="videocam-outline"></ion-icon>
-                    Video requerido MAX: 6MB
+                    Required video MAX: 6MB
                 </span>
             </div>
 
             <form id="uploadForm">
                 <div class="form-row">
                     <div class="field">
-                        <label for="artist"><ion-icon name="person-outline"></ion-icon> Artista *</label>
-                        <input type="text" id="artist" placeholder="Ej: SZA" required />
+                        <label for="artist"><ion-icon name="person-outline"></ion-icon> Artist *</label>
+                        <input type="text" id="artist" placeholder="e.g. SZA" required />
                     </div>
                     <div class="field">
-                        <label for="album"><ion-icon name="albums-outline"></ion-icon> Álbum *</label>
-                        <input type="text" id="album" placeholder="Ej: SOS" required />
+                        <label for="album"><ion-icon name="albums-outline"></ion-icon> Album *</label>
+                        <input type="text" id="album" placeholder="e.g. SOS" required />
                     </div>
                 </div>
 
@@ -89,30 +89,30 @@
                     <div class="field">
                         <label for="song">
                             <ion-icon name="musical-notes-outline"></ion-icon>
-                            Canción <span class="opacity-50 text-sm font-normal">(opcional)</span>
+                            Song <span class="opacity-50 text-sm font-normal">(optional)</span>
                         </label>
-                        <input type="text" id="song" placeholder="Ej: Kill Bill (opcional)" />
+                        <input type="text" id="song" placeholder="e.g. Kill Bill (optional)" />
                     </div>
                     <div class="field">
-                        <label for="videoFile"><ion-icon name="film-outline"></ion-icon> Archivo de video *</label>
+                        <label for="videoFile"><ion-icon name="film-outline"></ion-icon> Video File *</label>
                         <input type="file" id="videoFile" accept="video/mp4,video/webm" required />
                     </div>
                 </div>
                 <button type="submit" id="uploadBtn">
                     <ion-icon name="cloud-upload-outline"></ion-icon>
-                    Subir Canvas
+                    Upload Canvas
                 </button>
             </form>
             <div id="uploadMessage" class="message-md3" style="display:none;"></div>
         </section>
 
         <!-- ============================================
-        LISTA DE CANVAS
+        CANVAS LIST
         ============================================ -->
         <section class="panel list-section">
             <div class="panel-head">
                 <span class="panel-icon"><ion-icon name="disc-outline"></ion-icon></span>
-                <h2>Canvas subidos</h2>
+                <h2>Uploaded Canvases</h2>
                 <span class="spacer"></span>
                 <span id="totalBadge" class="badge">
                     <ion-icon name="albums-outline"></ion-icon>
@@ -123,21 +123,21 @@
             <!-- Loading -->
             <div id="loading">
                 <ion-icon name="refresh-outline" class="animate-spin"></ion-icon>
-                <p>Cargando tu colección...</p>
+                <p>Loading your collection...</p>
             </div>
 
-            <!-- Tabla -->
+            <!-- Table -->
             <div id="canvasList" style="display: none;">
                 <div class="overflow-x-auto">
                     <table id="canvasTable">
                         <thead>
                             <tr>
                                 <th>Preview</th>
-                                <th>Artista</th>
-                                <th>Álbum</th>
-                                <th>Canción</th>
+                                <th>Artist</th>
+                                <th>Album</th>
+                                <th>Song</th>
                                 <th>URL</th>
-                                <th class="text-center">Acciones</th>
+                                <th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="canvasTableBody"></tbody>
@@ -148,8 +148,8 @@
             <!-- Empty State -->
             <div id="emptyMessage" class="empty-state" style="display: none;">
                 <span class="icon">🎞️</span>
-                <p class="text-base">Todavía no hay Canvas subidos.</p>
-                <p class="text-sm opacity-60 mt-2">Sube tu primer video para empezar la colección.</p>
+                <p class="text-base">No Canvases uploaded yet.</p>
+                <p class="text-sm opacity-60 mt-2">Upload your first video to start the collection.</p>
             </div>
         </section>
 
@@ -157,7 +157,7 @@
         FOOTER
         ============================================ -->
         <footer class="studio-footer">
-            Hecho con <span class="accent">♥</span> para OpenTune
+            Made with <span class="accent">♥</span> for WormHole
         </footer>
     </div>
 

@@ -14,31 +14,31 @@ function normalizeText(text) {
 
 export default async function handler(req, res) {
     if (req.method !== 'GET') {
-        return res.status(405).json({ error: 'Método no permitido. Usa GET.' });
+        return res.status(405).json({ error: 'Method Not Allowed. Use GET.' });
     }
 
     try {
         if (!process.env.BLOB_READ_WRITE_TOKEN) {
             return res.status(500).json({
                 success: false,
-                error: 'Configuración de Blob Storage incompleta'
+                error: 'Blob Storage configuration is incomplete'
             });
         }
 
         const { artist, album, song } = req.query;
 
-        // ✅ Al menos artista o álbum son necesarios
+        // ✅ At least artist or album is required
         if (!artist && !album) {
             return res.status(400).json({
                 success: false,
-                error: 'Se requiere al menos artista o álbum'
+                error: 'At least artist or album is required'
             });
         }
 
-        // 📋 Listar todos los blobs
+        // 📋 List all blobs
         const blobs = await list({ prefix: 'canvases/' });
 
-        // 🔍 Buscar index.json
+        // 🔍 Search for index.json
         let indexData = { canvases: [] };
         const indexBlob = blobs.blobs.find(b => b.pathname === 'canvases/index.json');
 
@@ -63,25 +63,25 @@ export default async function handler(req, res) {
 
             let score = 0;
 
-            // ✅ PESO 1: Artista (muy importante)
+            // ✅ WEIGHT 1: Artist (very important)
             if (artist) {
                 if (cArtist === normalizedArtist) score += 40;
                 else if (cArtist.includes(normalizedArtist) || normalizedArtist.includes(cArtist)) score += 20;
             }
 
-            // ✅ PESO 2: Álbum (muy importante)
+            // ✅ WEIGHT 2: Album (very important)
             if (album) {
                 if (cAlbum === normalizedAlbum) score += 35;
                 else if (cAlbum.includes(normalizedAlbum) || normalizedAlbum.includes(cAlbum)) score += 18;
             }
 
-            // ✅ PESO 3: Canción (solo si se proporcionó)
+            // ✅ WEIGHT 3: Song (only if provided)
             if (song && song.trim()) {
                 if (cSong === normalizedSong) score += 25;
                 else if (cSong.includes(normalizedSong) || normalizedSong.includes(cSong)) score += 12;
             }
 
-            // ✅ Bonus: Si el álbum coincide exactamente con la canción (cuando no hay canción)
+            // ✅ Bonus: If the album matches the song exactly (when there is no song)
             if (!song || !song.trim()) {
                 if (cAlbum === cSong && cAlbum !== '') score += 5;
             }
@@ -92,7 +92,7 @@ export default async function handler(req, res) {
             }
         }
 
-        // ✅ Umbral mínimo: con artista+álbum es más fácil alcanzarlo
+        // ✅ Minimum threshold: with artist+album it is easier to reach
         const threshold = (song && song.trim()) ? 25 : 15;
 
         if (bestMatch && bestScore >= threshold) {
@@ -110,10 +110,10 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error('❌ Error en search:', error);
+        console.error('❌ Error in search:', error);
         return res.status(500).json({
             success: false,
-            error: 'Error interno: ' + error.message
+            error: 'Internal error: ' + error.message
         });
     }
 }

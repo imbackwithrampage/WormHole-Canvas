@@ -1,17 +1,17 @@
 // api/delete.js
-import { del } from '@vercel/blob';
+import { del, put } from '@vercel/blob';
 
 export default async function handler(req, res) {
     if (req.method !== 'DELETE') {
-        return res.status(405).json({ error: 'Método no permitido. Usa DELETE.' });
+        return res.status(405).json({ error: 'Method Not Allowed. Use DELETE.' });
     }
 
     try {
-        // Verificar token
+        // Verify token
         if (!process.env.BLOB_READ_WRITE_TOKEN) {
             return res.status(500).json({
                 success: false,
-                error: 'Configuración de Blob Storage incompleta'
+                error: 'Blob Storage configuration is incomplete'
             });
         }
 
@@ -20,23 +20,27 @@ export default async function handler(req, res) {
         if (!id) {
             return res.status(400).json({
                 success: false,
-                error: 'Se requiere el ID'
+                error: 'ID is required'
             });
         }
 
-        // 🔍 Buscar el índice
+        // 🔍 Find the index
         let indexData = { canvases: [] };
         let found = false;
         let fileUrl = '';
 
         try {
+            const host = process.env.VERCEL_URL || req.headers.host || 'localhost:3000';
+            const protocol = host.startsWith('localhost') ? 'http' : 'https';
             const response = await fetch(
-                `https://${process.env.VERCEL_URL}/api/blob/canvases/index.json`
+                `${protocol}://${host}/api/blob/canvases/index.json`
             );
             if (response.ok) {
                 indexData = await response.json();
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('Error fetching index via redirect:', e);
+        }
 
         indexData.canvases = indexData.canvases.filter(c => {
             if (c.id === id) {
@@ -52,16 +56,16 @@ export default async function handler(req, res) {
         if (!found) {
             return res.status(404).json({
                 success: false,
-                error: `No se encontró Canvas con ID: ${id}`
+                error: `Canvas with ID ${id} not found`
             });
         }
 
-        // 🗑️ Eliminar el archivo de Vercel Blob
+        // 🗑️ Delete the file from Vercel Blob
         if (fileUrl) {
             await del(fileUrl);
         }
 
-        // Guardar índice actualizado
+        // Save updated index
         await put('canvases/index.json', JSON.stringify(indexData, null, 2), {
             access: 'public',
             contentType: 'application/json'
@@ -69,15 +73,15 @@ export default async function handler(req, res) {
 
         return res.status(200).json({
             success: true,
-            message: 'Canvas eliminado correctamente',
+            message: 'Canvas deleted successfully',
             id: id
         });
 
     } catch (error) {
-        console.error('❌ Error en delete:', error);
+        console.error('❌ Error in delete:', error);
         return res.status(500).json({
             success: false,
-            error: 'Error interno: ' + error.message
+            error: 'Internal error: ' + error.message
         });
     }
 }

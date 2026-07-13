@@ -3,37 +3,37 @@ import { list } from '@vercel/blob';
 
 export default async function handler(req, res) {
     if (req.method !== 'GET') {
-        return res.status(405).json({ error: 'Método no permitido. Usa GET.' });
+        return res.status(405).json({ error: 'Method Not Allowed. Use GET.' });
     }
 
     try {
-        // Verificar token
+        // Verify token
         if (!process.env.BLOB_READ_WRITE_TOKEN) {
             return res.status(500).json({
                 success: false,
-                error: 'Configuración de Blob Storage incompleta'
+                error: 'Blob Storage configuration is incomplete'
             });
         }
 
-        // 📋 Listar todos los blobs en la carpeta 'canvases/'
+        // 📋 List all blobs in the 'canvases/' directory
         const blobs = await list({
             prefix: 'canvases/'
         });
 
-        // 🔍 Buscar el archivo index.json
+        // 🔍 Search for the index.json file
         let indexData = { canvases: [] };
         const indexBlob = blobs.blobs.find(b => b.pathname === 'canvases/index.json');
 
         if (indexBlob) {
-            // Descargar el contenido de index.json
+            // Download the contents of index.json
             const response = await fetch(indexBlob.url);
             if (response.ok) {
                 indexData = await response.json();
-                console.log('📖 Índice cargado:', indexData.canvases.length);
+                console.log('📖 Loaded index:', indexData.canvases.length);
             }
         }
 
-        // Ordenar por fecha
+        // Sort by date
         const canvases = (indexData.canvases || []).sort((a, b) => {
             const aDate = a.uploadedAt || a.updatedAt || '';
             const bDate = b.uploadedAt || b.updatedAt || '';
@@ -47,10 +47,10 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error('❌ Error en list:', error);
+        console.error('❌ Error in list:', error);
         return res.status(500).json({
             success: false,
-            error: 'Error interno: ' + error.message
+            error: 'Internal error: ' + error.message
         });
     }
 }
