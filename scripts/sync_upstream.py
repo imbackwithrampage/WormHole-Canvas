@@ -49,6 +49,8 @@ def main():
         content = content.replace("<span>OpenTune</span>", "<span>WormHole</span>")
         content = content.replace('title="Actualizar catálogo (R)"', 'title="Refresh catalog (R)"')
         content = content.replace("📩 Contacto para subir canvas vía Telegram:", "📩 Contact to upload canvas via Telegram:")
+        content = content.replace("https://t.me/ArturoCervantes254", "https://t.me/sasu_1205")
+        content = content.replace("@ArturoCervantes254", "@SunilSachindar")
         content = content.replace("<span>Conexión al servidor</span>", "<span>Server Connection</span>")
         content = content.replace('id="connStatus">Sin configurar</span>', 'id="connStatus">Not configured</span>')
         content = content.replace('<label for="apiBase">URL del Worker</label>', '<label for="apiBase">Worker URL / API Base</label>')
