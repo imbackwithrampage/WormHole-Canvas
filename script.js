@@ -385,7 +385,7 @@
             try {
                 const res = JSON.parse(xhr.responseText);
                 ok = res.success;
-                msg = res.message || null;
+                msg = res.message || res.error || null;
             } catch (_) {
                 msg = `Server responded HTTP ${xhr.status} without valid JSON (Is Worker down or URL incorrect?)`;
             }

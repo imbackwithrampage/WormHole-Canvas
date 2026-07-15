@@ -168,6 +168,7 @@ def main():
             "xhr.open('POST', `${base}/?action=upload`);\n        if (base !== '/api') {\n            xhr.setRequestHeader('Authorization', `Bearer ${store.token}`);\n        }"
         )
         content = content.replace("'⏳ Subiendo… 0%'", "'⏳ Uploading… 0%'")
+        content = content.replace("msg = res.message || null;", "msg = res.message || res.error || null;")
         content = content.replace("`⏳ Subiendo… ${pct}%`", "`⏳ Uploading… ${pct}%`")
         content = content.replace("`El servidor respondió HTTP ${xhr.status} sin JSON válido (¿Worker caído o URL incorrecta?)`", "`Server responded HTTP ${xhr.status} without valid JSON (Is Worker down or URL incorrect?)`")
         content = content.replace("showSnackbar('✅ Canvas subido correctamente a OpenTune 🎉');", "showSnackbar('✅ Canvas uploaded successfully to WormHole 🎉');")
