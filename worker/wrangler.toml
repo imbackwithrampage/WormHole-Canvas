@@ -1,0 +1,19 @@
+name = "wormhole-canvas-api"
+main = "src/index.js"
+compatibility_date = "2024-03-01"
+
+[vars]
+# Replace this with your custom secret or configure via 'wrangler secret put UPLOAD_TOKEN'
+UPLOAD_TOKEN = "your-upload-token-here"
+# The public URL of your R2 bucket (needed if not using custom domain/subdomain bindings)
+PUBLIC_CDN_BASE = "https://your-r2-public-cdn-url.com"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "wormhole-canvases"
+preview_bucket_name = "wormhole-canvases-preview"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "wormhole-canvas-db"
+database_id = "your-d1-database-uuid-here"
