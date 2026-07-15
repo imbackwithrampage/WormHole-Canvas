@@ -178,7 +178,10 @@ async function parseMultipartFormData(req) {
         throw new Error('Boundary not found in Content-Type');
     }
 
-    const boundary = boundaryMatch[1];
+    let boundary = boundaryMatch[1].trim();
+    if (boundary.startsWith('"') && boundary.endsWith('"')) {
+        boundary = boundary.slice(1, -1);
+    }
     const body = bodyBuffer.toString('binary');
     const parts = body.split(`--${boundary}`);
 
