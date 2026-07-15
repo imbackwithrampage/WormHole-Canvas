@@ -61,11 +61,11 @@ export default async function handler(req, res) {
             });
         }
 
-        // ✅ Validate size (6MB maximum)
-        if (videoFile.size > 6 * 1024 * 1024) {
+        // ✅ Validate size (4.5MB maximum due to Vercel limits)
+        if (videoFile.size > 4.5 * 1024 * 1024) {
             return res.status(400).json({
                 success: false,
-                error: 'The video file must be less than 6MB'
+                error: 'The video file must be less than 4.5MB due to Vercel request limits'
             });
         }
 

@@ -149,7 +149,10 @@ def main():
         content = content.replace("`⚠️ Error inesperado: ${err.message || err}`", "`⚠️ Unexpected error: ${err.message || err}`")
         
         # Dropzone translations
-        content = content.replace("'⚠️ Elegí un archivo de video (MP4)'", "'⚠️ Choose a video file (MP4)'")
+        content = content.replace(
+            "    function setFile(file) {\n        if (!file) return;\n        if (!file.type.includes('video')) {\n            showSnackbar('⚠️ Elegí un archivo de video (MP4)', true);\n            return;\n        }\n        selectedFile = file;",
+            "    function setFile(file) {\n        if (!file) return;\n        if (!file.type.includes('video')) {\n            showSnackbar('⚠️ Choose a video file (MP4)', true);\n            return;\n        }\n        if (file.size > 4.5 * 1024 * 1024) {\n            showSnackbar('⚠️ Video file is too large. Maximum size allowed on Vercel is 4.5MB.', true);\n            return;\n        }\n        selectedFile = file;"
+        )
         content = content.replace('<div class="dz-title">📹 Arrastrá tu video acá</div>', '<div class="dz-title">📹 Drag your video here</div>')
         content = content.replace('<div class="dz-sub">o hacé clic para seleccionarlo · MP4 · Formato vertical (9:16)</div>', '<div class="dz-sub">or click to select it · MP4 · Portrait format (9:16)</div>')
         

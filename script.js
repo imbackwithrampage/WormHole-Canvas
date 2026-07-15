@@ -262,6 +262,10 @@
             showSnackbar('⚠️ Choose a video file (MP4)', true);
             return;
         }
+        if (file.size > 4.5 * 1024 * 1024) {
+            showSnackbar('⚠️ Video file is too large. Maximum size allowed on Vercel is 4.5MB.', true);
+            return;
+        }
         selectedFile = file;
         const url = URL.createObjectURL(file);
         dropzone.classList.add('has-file');
