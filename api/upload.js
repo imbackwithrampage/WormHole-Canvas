@@ -53,15 +53,16 @@ export default async function handler(req, res) {
             });
         }
 
-        if (!files.video) {
+        const videoFile = files.file || files.video;
+        if (!videoFile) {
             return res.status(400).json({
                 success: false,
-                error: 'Missing video file'
+                error: 'Missing video file (use field name "file" or "video")'
             });
         }
 
         // ✅ Validate size (6MB maximum)
-        if (files.video.size > 6 * 1024 * 1024) {
+        if (videoFile.size > 6 * 1024 * 1024) {
             return res.status(400).json({
                 success: false,
                 error: 'The video file must be less than 6MB'
@@ -71,7 +72,6 @@ export default async function handler(req, res) {
         const artist = fields.artist.trim();
         const album = fields.album.trim();
         const song = fields.song ? fields.song.trim() : ''; // ✅ Optional
-        const videoFile = files.video;
 
         console.log('📤 Processing:', { artist, album, song: song || '(no song)', filename: videoFile.filename });
 

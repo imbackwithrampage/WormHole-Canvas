@@ -43,7 +43,11 @@ export default async function handler(req, res) {
         return res.status(200).json({
             success: true,
             total: canvases.length,
-            canvases: canvases
+            canvases: canvases,
+            data: {
+                canvases: canvases,
+                total: canvases.length
+            }
         });
 
     } catch (error) {

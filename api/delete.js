@@ -15,7 +15,7 @@ export default async function handler(req, res) {
             });
         }
 
-        const { id } = req.body;
+        const id = req.body?.id || req.query?.id;
 
         if (!id) {
             return res.status(400).json({
