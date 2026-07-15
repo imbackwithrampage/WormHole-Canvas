@@ -1,0 +1,44 @@
+name: Upstream Sync and Rebrand
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight UTC
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Configure upstream remote
+        run: |
+          git remote add upstream https://github.com/Arturo254/Canvas-Artwork.git || true
+          git fetch upstream
+
+      - name: Run sync and translate script
+        run: python scripts/sync_upstream.py
+
+      - name: Commit and Push Changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "chore: auto-sync with upstream and apply WormHole rebranding/translations"
+            git push origin main
+          else
+            echo "No updates or changes found from upstream."
+          fi
