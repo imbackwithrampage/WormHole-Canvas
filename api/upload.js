@@ -1,6 +1,12 @@
 // api/upload.js
 import { put, list } from '@vercel/blob';
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 // 🔧 Helper: Generate unique ID (with optional song)
 function generateId(artist, album, song) {
     const clean = (str) => str
