@@ -162,11 +162,13 @@ async function parseMultipartFormData(req) {
     const fields = {};
     const files = {};
 
-    const chunks = [];
-    for await (const chunk of req) {
-        chunks.push(chunk);
-    }
-    const bodyBuffer = Buffer.concat(chunks);
+    // Read the stream using robust event listeners
+    const bodyBuffer = await new Promise((resolve, reject) => {
+        const chunks = [];
+        req.on('data', (chunk) => chunks.push(chunk));
+        req.on('end', () => resolve(Buffer.concat(chunks)));
+        req.on('error', (err) => reject(err));
+    });
     
     if (bodyBuffer.length === 0) {
         return { fields, files };
@@ -188,11 +190,17 @@ async function parseMultipartFormData(req) {
     for (const part of parts) {
         if (part.trim() === '' || part.trim() === '--') continue;
 
-        const headerEndIndex = part.indexOf('\r\n\r\n');
+        // Support both CRLF (\r\n\r\n) and LF (\n\n) header boundaries
+        let headerEndIndex = part.indexOf('\r\n\r\n');
+        let delimiterLength = 4;
+        if (headerEndIndex === -1) {
+            headerEndIndex = part.indexOf('\n\n');
+            delimiterLength = 2;
+        }
         if (headerEndIndex === -1) continue;
 
         const headersPart = part.substring(0, headerEndIndex);
-        const content = part.substring(headerEndIndex + 4);
+        const content = part.substring(headerEndIndex + delimiterLength);
 
         const nameMatch = headersPart.match(/name="([^"]+)"/);
         if (!nameMatch) continue;
@@ -202,10 +210,10 @@ async function parseMultipartFormData(req) {
 
         if (filenameMatch) {
             const filename = filenameMatch[1];
-            const contentTypeMatch = headersPart.match(/Content-Type: ([^\r\n]+)/);
+            const contentTypeMatch = headersPart.match(/Content-Type: ([^\r\n\n]+)/i);
             const contentTypeValue = contentTypeMatch ? contentTypeMatch[1] : 'application/octet-stream';
             
-            const cleanContent = content.replace(/\r\n$/, '');
+            const cleanContent = content.replace(/\r\n$/, '').replace(/\n$/, '');
             
             files[name] = {
                 filename: filename,
@@ -214,7 +222,7 @@ async function parseMultipartFormData(req) {
                 size: cleanContent.length
             };
         } else {
-            fields[name] = content.replace(/\r\n$/, '').trim();
+            fields[name] = content.replace(/\r\n$/, '').replace(/\n$/, '').trim();
         }
     }
 
