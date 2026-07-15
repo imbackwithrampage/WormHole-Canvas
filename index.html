@@ -1,167 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Canvas Studio · WormHole</title>
-    <meta name="color-scheme" content="dark" />
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Flowbite -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
-
-    <!-- Iconos -->
-    <link rel='stylesheet'
-        href='https://cdn-uicons.flaticon.com/2.0.0/uicons-bold-straight/css/uicons-bold-straight.css'>
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
-    <link rel='stylesheet'
-        href='https://cdn-uicons.flaticon.com/2.1.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-brands/css/uicons-brands.css'>
-    <link rel='stylesheet'
-        href='https://cdn-uicons.flaticon.com/2.3.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
-
-    <!-- Ionicons -->
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-
-    <!-- Fuentes -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>WormHole · Canvas Studio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-        rel="stylesheet">
-
-    <!-- Estilos -->
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Text:wght@400;500;700&family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600;8..144,700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-    <div class="container mx-auto px-4 max-w-6xl">
 
-        <!-- ============================================
-        HEADER
-        ============================================ -->
-        <header class="studio-header">
-            <div class="eyebrow">
-                <span class="dot"></span>
-                WormHole Canvas
+    <div class="ambient" aria-hidden="true">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+    </div>
+
+    <div class="app">
+
+        <!-- Developer Warning (banner in normal flow, not fixed) -->
+        <div class="dev-warning" id="devWarning">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="M12 8v4"/><path d="M12 16h.01"/>
+            </svg>
+            <span>Tool for <strong>developers</strong> and content administrators of WormHole.</span>
+            <button class="warning-close" id="closeWarning" title="Close notice" type="button">✕</button>
+        </div>
+
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark">WH</div>
+                <div class="brand-text">
+                    <h1>Canvas Studio</h1>
+                    <p>Upload and manage the animated canvases of WormHole</p>
+                </div>
             </div>
-            <div class="brand-row">
-                <span class="eq"
-                    aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></span>
-                <h1>Canvas <span class="accent">Studio</span></h1>
+            <div class="topbar-actions">
+                <a class="repo-badge" href="https://github.com/imbackwithrampage/WormHole-Canvas" target="_blank" rel="noopener" title="WormHole Repository on GitHub">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.26-1.28-5.26-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.71 5.4-5.29 5.69.42.36.78 1.07.78 2.16 0 1.56-.01 2.82-.01 3.2 0 .31.21.67.8.56A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+                    <span>WormHole</span>
+                </a>
+                <button class="icon-btn" id="refreshBtn" title="Refresh catalog (R)" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+                        <path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                    </svg>
+                </button>
             </div>
-            <p class="subtitle">
-                Upload and manage looping videos that play behind the cover art of each song.
-            </p>
         </header>
 
-        <!-- ============================================
-        UPLOAD FORM
-        ============================================ -->
-        <section class="panel">
-            <div class="panel-head">
-                <span class="panel-icon"><ion-icon name="cloud-upload-outline"></ion-icon></span>
-                <h2>Upload new Canvas</h2>
-                <span class="spacer"></span>
-                <span class="badge amber">
-                    <ion-icon name="videocam-outline"></ion-icon>
-                    Required video MAX: 6MB
+        <p class="contact-line">📩 Contact to upload canvas via Telegram: <a href="https://t.me/ArturoCervantes254" target="_blank" rel="noopener">@ArturoCervantes254</a></p>
+
+        <!-- Connection Settings -->
+        <section class="settings" id="settingsPanel">
+            <button class="settings-head" id="settingsToggle" type="button">
+                <span class="settings-head-left">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span>Server Connection</span>
                 </span>
+                <span class="settings-head-right">
+                    <span class="settings-status" id="connStatus">Not configured</span>
+                    <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+                </span>
+            </button>
+            <div class="settings-body">
+                <div class="settings-grid">
+                    <div class="field mono">
+                        <input type="text" id="apiBase" autocomplete="off" placeholder=" ">
+                        <label for="apiBase">Worker URL / API Base</label>
+                        <p class="hint">e.g., https://wormhole-canvas-api.your-username.workers.dev</p>
+                    </div>
+                    <div class="field mono">
+                        <input type="password" id="uploadToken" autocomplete="off" placeholder=" ">
+                        <label for="uploadToken">Upload Token</label>
+                        <p class="hint">The UPLOAD_TOKEN secret configured in the Worker</p>
+                    </div>
+                </div>
+                <div class="settings-actions">
+                    <button class="btn btn-tonal" id="saveSettings" type="button">Save Connection</button>
+                    <button class="btn btn-tonal" id="testConn" type="button">Test Connection</button>
+                </div>
+                <p class="hint diagnostic" id="testResult"></p>
+            </div>
+        </section>
+
+        <!-- Upload Form -->
+        <section class="surface-card" id="uploadSection">
+            <h2 class="section-title">New Canvas</h2>
+            <p class="section-sub">A canvas with no specific song applies to the entire album.</p>
+
+            <div class="dropzone" id="dropzone">
+                <input type="file" id="fileInput" accept="video/mp4" hidden>
+                <div id="dzEmpty">
+                    <div class="dz-icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                    </div>
+                    <div class="dz-title">Drag your video here</div>
+                    <div class="dz-sub">or click to choose it · MP4, portrait format recommended</div>
+                </div>
             </div>
 
-            <form id="uploadForm">
-                <div class="form-row">
-                    <div class="field">
-                        <label for="artist"><ion-icon name="person-outline"></ion-icon> Artist *</label>
-                        <input type="text" id="artist" placeholder="e.g. SZA" required />
-                    </div>
-                    <div class="field">
-                        <label for="album"><ion-icon name="albums-outline"></ion-icon> Album *</label>
-                        <input type="text" id="album" placeholder="e.g. SOS" required />
-                    </div>
+            <div class="mode-toggle" id="albumModeWrap">
+                <div class="mode-toggle-text">
+                    <strong>💿 Full Album Mode</strong>
+                    <span>The canvas will display for all songs in the album</span>
                 </div>
-
-                <div class="form-row">
-                    <div class="field">
-                        <label for="song">
-                            <ion-icon name="musical-notes-outline"></ion-icon>
-                            Song <span class="opacity-50 text-sm font-normal">(optional)</span>
-                        </label>
-                        <input type="text" id="song" placeholder="e.g. Kill Bill (optional)" />
-                    </div>
-                    <div class="field">
-                        <label for="videoFile"><ion-icon name="film-outline"></ion-icon> Video File *</label>
-                        <input type="file" id="videoFile" accept="video/mp4,video/webm" required />
-                    </div>
-                </div>
-                <button type="submit" id="uploadBtn">
-                    <ion-icon name="cloud-upload-outline"></ion-icon>
-                    Upload Canvas
+                <button class="switch" id="albumModeSwitch" role="switch" aria-checked="false" type="button" title="Activate album mode">
+                    <span class="switch-thumb"></span>
                 </button>
-            </form>
-            <div id="uploadMessage" class="message-md3" style="display:none;"></div>
-        </section>
-
-        <!-- ============================================
-        CANVAS LIST
-        ============================================ -->
-        <section class="panel list-section">
-            <div class="panel-head">
-                <span class="panel-icon"><ion-icon name="disc-outline"></ion-icon></span>
-                <h2>Uploaded Canvases</h2>
-                <span class="spacer"></span>
-                <span id="totalBadge" class="badge">
-                    <ion-icon name="albums-outline"></ion-icon>
-                    <span id="totalCount">0</span>
-                </span>
             </div>
 
-            <!-- Loading -->
-            <div id="loading">
-                <ion-icon name="refresh-outline" class="animate-spin"></ion-icon>
-                <p>Loading your collection...</p>
-            </div>
-
-            <!-- Table -->
-            <div id="canvasList" style="display: none;">
-                <div class="overflow-x-auto">
-                    <table id="canvasTable">
-                        <thead>
-                            <tr>
-                                <th>Preview</th>
-                                <th>Artist</th>
-                                <th>Album</th>
-                                <th>Song</th>
-                                <th>URL</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="canvasTableBody"></tbody>
-                    </table>
+            <div class="form-grid">
+                <div class="field">
+                    <input type="text" id="fArtist" autocomplete="off" placeholder=" ">
+                    <label for="fArtist">Artist *</label>
+                </div>
+                <div class="field">
+                    <input type="text" id="fAlbum" autocomplete="off" placeholder=" ">
+                    <label for="fAlbum">Album</label>
+                </div>
+                <div class="field full" id="songFieldWrap">
+                    <input type="text" id="fSong" autocomplete="off" placeholder=" ">
+                    <label id="songLabel" for="fSong">Song (optional — empty = applies to entire album)</label>
                 </div>
             </div>
 
-            <!-- Empty State -->
-            <div id="emptyMessage" class="empty-state" style="display: none;">
-                <span class="icon">🎞️</span>
-                <p class="text-base">No Canvases uploaded yet.</p>
-                <p class="text-sm opacity-60 mt-2">Upload your first video to start the collection.</p>
+            <div class="progress-wrap" id="progressWrap">
+                <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+                <div class="progress-label" id="progressLabel">Uploading… 0%</div>
+            </div>
+
+            <button class="btn btn-filled btn-block" id="uploadBtn" disabled type="button">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+                Upload Canvas
+            </button>
+        </section>
+
+        <!-- Gallery -->
+        <section class="gallery-section">
+            <div class="gallery-title-row">
+                <div>
+                    <h2 class="section-title">Catalog</h2>
+                    <p class="section-sub">Canvases already available for WormHole</p>
+                </div>
+            </div>
+
+            <div id="statsBar" class="stats-bar"></div>
+
+            <div class="toolbar">
+                <div class="search-field" id="searchFieldWrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    <input type="text" id="searchInput" placeholder="Search by artist or album… ( / )">
+                    <button class="clear-btn" id="searchClear" title="Clear search" type="button">✕</button>
+                </div>
+                <div class="toolbar-right">
+                    <div class="chips" id="filterChips">
+                        <button class="chip active" data-filter="all" type="button">All</button>
+                    </div>
+                </div>
+            </div>
+
+            <p class="chip-count" id="totalCount">—</p>
+
+            <div id="galleryContainer">
+                <div class="grid" id="skeletonGrid"></div>
             </div>
         </section>
 
-        <!-- ============================================
-        FOOTER
-        ============================================ -->
-        <footer class="studio-footer">
-            Made with <span class="accent">♥</span> for WormHole
+        <footer>
+            <p id="footerTimestamp">—</p>
+            <p>WormHole Canvas Studio · <a href="https://github.com/imbackwithrampage/WormHole-Canvas" target="_blank" rel="noopener">github.com/imbackwithrampage/WormHole-Canvas</a></p>
         </footer>
+
+    </div>
+
+    <!-- FAB upload (appears on scroll, mainly mobile) -->
+    <button class="fab" id="fabUpload" title="Go to upload canvas" type="button">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+    </button>
+
+    <!-- Snackbar -->
+    <div class="snackbar" id="snackbar" role="status" aria-live="polite">
+        <span class="dot"></span>
+        <span id="snackbarText"></span>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal-backdrop" id="modalBackdrop">
+        <div class="modal">
+            <div class="modal-media-wrap">
+                <button class="modal-close-x" id="modalClose" title="Close" type="button">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+                </button>
+                <div class="modal-media"><video id="modalVideo" muted loop playsinline autoplay></video></div>
+            </div>
+            <div class="modal-body">
+                <span class="modal-scope-badge" id="modalScopeBadge">—</span>
+                <h3 id="modalArtist">—</h3>
+                <p id="modalMeta">—</p>
+                <p class="modal-album-info" id="modalAlbum"></p>
+                <div class="modal-actions">
+                    <button class="btn btn-tonal" id="modalCopyUrl">Copy URL</button>
+                    <a class="btn btn-filled" id="modalOpenUrl" href="#" target="_blank" rel="noopener">Open</a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
 </body>
-
 </html>

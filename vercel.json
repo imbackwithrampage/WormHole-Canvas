@@ -15,6 +15,50 @@
   ],
   "rewrites": [
     {
+      "source": "/api",
+      "has": [
+        {
+          "type": "query",
+          "key": "action",
+          "value": "list"
+        }
+      ],
+      "destination": "/api/list"
+    },
+    {
+      "source": "/api",
+      "has": [
+        {
+          "type": "query",
+          "key": "action",
+          "value": "upload"
+        }
+      ],
+      "destination": "/api/upload"
+    },
+    {
+      "source": "/api",
+      "has": [
+        {
+          "type": "query",
+          "key": "action",
+          "value": "delete"
+        }
+      ],
+      "destination": "/api/delete"
+    },
+    {
+      "source": "/api",
+      "has": [
+        {
+          "type": "query",
+          "key": "action",
+          "value": "search"
+        }
+      ],
+      "destination": "/api/search"
+    },
+    {
       "source": "/api/blob/:path*",
       "destination": "/api/blob?path=:path*"
     }

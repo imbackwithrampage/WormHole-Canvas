@@ -1,288 +1,591 @@
-// ============================================
-// CONFIGURATION
-// ============================================
-const API_BASE = '/api';
+(function() {
+    'use strict';
 
-// ============================================
-// DOM REFERENCES
-// ============================================
-const form = document.getElementById('uploadForm');
-const artistInput = document.getElementById('artist');
-const albumInput = document.getElementById('album');
-const songInput = document.getElementById('song');
-const fileInput = document.getElementById('videoFile');
-const uploadBtn = document.getElementById('uploadBtn');
-const uploadMessage = document.getElementById('uploadMessage');
-const canvasList = document.getElementById('canvasList');
-const canvasTableBody = document.getElementById('canvasTableBody');
-const loading = document.getElementById('loading');
-const emptyMessage = document.getElementById('emptyMessage');
-const totalCount = document.getElementById('totalCount');
+    // ============================================================
+    // DOM References
+    // ============================================================
+    const $ = (id) => document.getElementById(id);
 
-// ============================================
-// FUNCTIONS
-// ============================================
+    const apiBaseInput = $('apiBase');
+    const tokenInput = $('uploadToken');
+    const connStatus = $('connStatus');
+    const settingsPanel = $('settingsPanel');
+    const settingsToggle = $('settingsToggle');
+    const saveSettingsBtn = $('saveSettings');
+    const testConnBtn = $('testConn');
+    const testResult = $('testResult');
 
-// Decode UTF-8 text
-function decodeText(text) {
-    if (!text) return '';
-    try {
-        const txt = document.createElement('textarea');
-        txt.innerHTML = text;
-        return txt.value;
-    } catch (e) {
-        return text;
+    const dropzone = $('dropzone');
+    const fileInput = $('fileInput');
+    const uploadBtn = $('uploadBtn');
+
+    const fArtist = $('fArtist');
+    const fAlbum = $('fAlbum');
+    const fSong = $('fSong');
+
+    const progressWrap = $('progressWrap');
+    const progressFill = $('progressFill');
+    const progressLabel = $('progressLabel');
+
+    const searchInput = $('searchInput');
+    const refreshBtn = $('refreshBtn');
+    const galleryContainer = $('galleryContainer');
+    const totalCount = $('totalCount');
+    const skeletonGrid = $('skeletonGrid');
+
+    const snackbar = $('snackbar');
+    const snackbarText = $('snackbarText');
+
+    const modalBackdrop = $('modalBackdrop');
+    const modalVideo = $('modalVideo');
+    const modalClose = $('modalClose');
+    const modalArtist = $('modalArtist');
+    const modalMeta = $('modalMeta');
+    const modalAlbum = $('modalAlbum');
+    const modalOpenUrl = $('modalOpenUrl');
+    const modalCopyUrl = $('modalCopyUrl');
+
+    const closeWarningBtn = $('closeWarning');
+    const devWarning = $('devWarning');
+    const footerTimestamp = $('footerTimestamp');
+
+    // ============================================================
+    // Store (localStorage)
+    // ============================================================
+    const store = {
+        get apiBase() { return localStorage.getItem('wh_api_base') || '/api'; },
+        set apiBase(v) { localStorage.setItem('wh_api_base', v); },
+        get token() { return localStorage.getItem('wh_upload_token') || ''; },
+        set token(v) { localStorage.setItem('wh_upload_token', v); },
+        get warningHidden() { return localStorage.getItem('wh_warning_hidden') === 'true'; },
+        set warningHidden(v) { localStorage.setItem('wh_warning_hidden', v); }
+    };
+
+    // ============================================================
+    // Utility Functions
+    // ============================================================
+    function normalizedBase() {
+        return store.apiBase.trim().replace(/\/+$/, '');
     }
-}
 
-// Escape HTML to prevent XSS
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// Show message in the form
-function showMessage(element, message, type) {
-    element.textContent = message;
-    element.className = 'message-md3 ' + type;
-    element.style.display = 'block';
-}
-
-// Hide message
-function hideMessage(element) {
-    element.className = 'message-md3';
-    element.textContent = '';
-    element.style.display = 'none';
-}
-
-// Update total count
-function updateTotalCount(count) {
-    if (totalCount) {
-        totalCount.textContent = count;
+    function escapeHtml(s) {
+        return (s || '').replace(/[&<>"']/g, (m) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[m]);
     }
-}
 
-// Load Canvas list
-async function loadCanvasList() {
-    try {
-        loading.style.display = 'block';
-        canvasList.style.display = 'none';
-        emptyMessage.style.display = 'none';
+    function humanSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
 
-        const response = await fetch(`${API_BASE}/list`);
-        const data = await response.json();
-
-        loading.style.display = 'none';
-
-        if (data.canvases && data.canvases.length > 0) {
-            canvasList.style.display = 'block';
-            updateTotalCount(data.canvases.length);
-            renderCanvasTable(data.canvases);
-        } else {
-            emptyMessage.style.display = 'block';
-            updateTotalCount(0);
-        }
-    } catch (error) {
-        loading.style.display = 'none';
-        console.error('Error loading list:', error);
-        emptyMessage.style.display = 'block';
-        emptyMessage.innerHTML = `
-            <span class="icon">❌</span>
-            <p class="text-base">Error loading Canvases</p>
-            <p class="text-sm opacity-60 mt-2">${error.message}</p>
+    function emptyStateHtml(title, sub) {
+        return `
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="5" width="15" height="14" rx="2"/>
+                    <path d="M23 7l-7 5 7 5V7z"/>
+                </svg>
+                <h4>${escapeHtml(title)}</h4>
+                <p>${escapeHtml(sub)}</p>
+            </div>
         `;
     }
-}
 
-// Render Canvas table
-function renderCanvasTable(canvases) {
-    canvasTableBody.innerHTML = '';
-    
-    canvases.forEach((canvas) => {
-        const artist = decodeText(canvas.artist);
-        const album = decodeText(canvas.album);
-        const song = decodeText(canvas.song || '');
-        
-        const isVideo = canvas.type === 'mp4' || canvas.type === 'webm' || canvas.type === 'mov';
-        
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>
-                ${isVideo ? `
-                    <div class="canvas-preview" onclick="window.open('${canvas.url}', '_blank')" title="View Canvas">
-                        <video muted>
-                            <source src="${canvas.url}" type="video/${canvas.type}">
-                        </video>
-                    </div>
-                ` : `
-                    <div class="canvas-preview flex items-center justify-center" style="background: var(--md-primary-container);" onclick="window.open('${canvas.url}', '_blank')" title="View Canvas">
-                        <ion-icon name="image-outline" style="font-size: 1.5rem; color: var(--md-primary);"></ion-icon>
-                    </div>
-                `}
-            </td>
-            <td><span class="font-medium">${escapeHtml(artist)}</span></td>
-            <td>${escapeHtml(album)}</td>
-            <td>${escapeHtml(song) || '<span class="opacity-40 text-sm">No song</span>'}</td>
-            <td>
-                <a href="${canvas.url}" target="_blank" class="link-md3" title="${canvas.url}">
-                    <ion-icon name="open-outline" style="font-size: 1rem;"></ion-icon>
-                    View
-                </a>
-            </td>
-            <td>
-                <div class="flex items-center justify-center gap-1">
-                    <button class="btn-icon-md3" data-url="${canvas.url}" title="Copy URL">
-                        <ion-icon name="copy-outline"></ion-icon>
-                    </button>
-                    <button class="btn-icon-md3 danger" data-id="${canvas.id}" title="Delete">
-                        <ion-icon name="trash-outline"></ion-icon>
-                    </button>
+    function skeletons(n) {
+        return Array.from({ length: n }).map(() => '<div class="skeleton"></div>').join('');
+    }
+
+    // ============================================================
+    // Footer Timestamp
+    // ============================================================
+    function updateFooterTimestamp() {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        const timeStr = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        if (footerTimestamp) {
+            footerTimestamp.textContent = `Last updated: ${dateStr} · ${timeStr}`;
+        }
+    }
+    updateFooterTimestamp();
+
+    // ============================================================
+    // Snackbar
+    // ============================================================
+    let snackTimer = null;
+
+    function showSnackbar(text, isError) {
+        const el = snackbar;
+        snackbarText.textContent = text;
+        el.classList.toggle('error', !!isError);
+        el.classList.add('show');
+        clearTimeout(snackTimer);
+        const duration = Math.min(7000, Math.max(3200, text.length * 60));
+        snackTimer = setTimeout(() => el.classList.remove('show'), duration);
+    }
+
+    // ============================================================
+    // Connection Status
+    // ============================================================
+    function refreshConnStatus() {
+        const configured = !!normalizedBase() && (normalizedBase() === '/api' || !!store.token);
+        connStatus.textContent = configured ? '✅ Connected' : '🔴 Not configured';
+        connStatus.classList.toggle('ok', configured);
+        return configured;
+    }
+
+    // ============================================================
+    // Developer Warning
+    // ============================================================
+    function initWarning() {
+        if (store.warningHidden) {
+            devWarning.style.display = 'none';
+        }
+
+        closeWarningBtn.addEventListener('click', () => {
+            devWarning.style.display = 'none';
+            store.warningHidden = true;
+        });
+    }
+
+    // ============================================================
+    // Settings Panel
+    // ============================================================
+    apiBaseInput.value = store.apiBase;
+    tokenInput.value = store.token;
+    refreshConnStatus();
+
+    if (!refreshConnStatus()) {
+        settingsPanel.classList.add('open');
+    }
+
+    settingsToggle.addEventListener('click', () => {
+        settingsPanel.classList.toggle('open');
+    });
+
+    saveSettingsBtn.addEventListener('click', () => {
+        store.apiBase = apiBaseInput.value.trim();
+        store.token = tokenInput.value.trim();
+        const ok = refreshConnStatus();
+        showSnackbar(ok ? '✅ Connection saved successfully' : '⚠️ Complete URL and token', !ok);
+        if (ok) {
+            settingsPanel.classList.remove('open');
+            loadCatalog();
+        }
+    });
+
+    // ============================================================
+    // Test Connection
+    // ============================================================
+    testConnBtn.addEventListener('click', async () => {
+        const base = apiBaseInput.value.trim().replace(/\/+$/, '');
+        testResult.style.color = 'var(--md-on-surface-variant)';
+        testResult.textContent = '⏳ Testing connection...';
+
+        if (!base) {
+            testResult.style.color = 'var(--md-error)';
+            testResult.textContent = '⚠️ Enter the Worker URL first.';
+            return;
+        }
+
+        if (!/^https?:\/\//i.test(base)) {
+            testResult.style.color = 'var(--md-error)';
+            testResult.textContent = '⚠️ The URL must start with https:// (or http:// only for local).';
+            return;
+        }
+
+        try {
+            const startedAt = performance.now();
+            const res = await fetch(`${base}/?action=list`, { method: 'GET' });
+            const elapsed = Math.round(performance.now() - startedAt);
+            const text = await res.text();
+
+            let parsed = null;
+            try { parsed = JSON.parse(text); } catch (_) {}
+
+            if (!parsed) {
+                testResult.style.color = 'var(--md-error)';
+                testResult.textContent =
+                    `⚠️ The server responded (HTTP ${res.status}) but it is not valid JSON.\n` +
+                    `This usually means the Worker is not deployed at that URL, ` +
+                    `or that there is an internal error.\nFirst characters:\n${text.slice(0, 180)}`;
+                return;
+            }
+
+            if (!parsed.success) {
+                testResult.style.color = 'var(--md-error)';
+                testResult.textContent = `⚠️ The server responded but with error: ${parsed.message || 'no message'}`;
+                return;
+            }
+
+            const n = parsed?.data?.canvases?.length ?? 0;
+            const sampleUrl = parsed?.data?.canvases?.[0]?.url || '(empty catalog)';
+            const badUrl = sampleUrl.startsWith('undefined');
+
+            testResult.style.color = badUrl ? 'var(--md-error)' : '#B8FBAF';
+            testResult.textContent =
+                `✅ Connected in ${elapsed} ms · ${n} canvas(es) in the catalog.\n` +
+                `📹 Example URL: ${sampleUrl}` +
+                (badUrl ? '\n⚠️ Starts with "undefined": PUBLIC_CDN_BASE needs to be configured in the Worker.' : '');
+        } catch (err) {
+            testResult.style.color = 'var(--md-error)';
+            const isCors = err instanceof TypeError;
+            testResult.textContent = isCors ?
+                '⚠️ Fetch blocked (Failed to fetch). Most common causes:\n' +
+                '  · The URL is misspelled or the Worker is not deployed.\n' +
+                '  · OPTIONS/CORS handling is missing in the Worker (redeploy the corrected version).\n' +
+                '  · You are opening this HTML from file:// and the browser blocks it — try uploading it to a hosting service or Cloudflare Pages.' :
+                `⚠️ Unexpected error: ${err.message || err}`;
+        }
+    });
+
+    // ============================================================
+    // Dropzone
+    // ============================================================
+    let selectedFile = null;
+
+    function setFile(file) {
+        if (!file) return;
+        if (!file.type.includes('video')) {
+            showSnackbar('⚠️ Choose a video file (MP4)', true);
+            return;
+        }
+        selectedFile = file;
+        const url = URL.createObjectURL(file);
+        dropzone.classList.add('has-file');
+        dropzone.innerHTML = `
+            <div class="preview-wrap">
+                <video src="${url}" autoplay muted loop playsinline></video>
+                <button class="preview-remove" id="removeFileBtn" type="button" aria-label="Quitar archivo">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                        <path d="M18 6L6 18"/>
+                        <path d="M6 6l12 12"/>
+                    </svg>
+                </button>
+                <div class="preview-meta">📹 ${escapeHtml(file.name)} · ${humanSize(file.size)}</div>
+            </div>
+        `;
+        document.getElementById('removeFileBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            clearFile();
+        });
+        validateForm();
+    }
+
+    function clearFile() {
+        selectedFile = null;
+        fileInput.value = '';
+        dropzone.classList.remove('has-file', 'drag');
+        dropzone.innerHTML = `
+            <div id="dzEmpty">
+                <div class="dz-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M23 7l-7 5 7 5V7z"/>
+                        <rect x="1" y="5" width="15" height="14" rx="2"/>
+                    </svg>
                 </div>
-            </td>
+                <div class="dz-title">📹 Drag your video here</div>
+                <div class="dz-sub">or click to select it · MP4 · Portrait format (9:16)</div>
+            </div>
         `;
-        canvasTableBody.appendChild(row);
+        validateForm();
+    }
+
+    dropzone.addEventListener('click', (e) => {
+        if (!dropzone.classList.contains('has-file')) fileInput.click();
     });
 
-    // EVENT LISTENER: Copy URL
-    document.querySelectorAll('.btn-icon-md3[data-url]').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const url = this.dataset.url;
-            
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url).then(() => {
-                    showMessage(uploadMessage, '✅ URL copied to clipboard', 'success');
-                    setTimeout(() => hideMessage(uploadMessage), 3000);
-                }).catch(() => {
-                    fallbackCopy(url);
-                });
-            } else {
-                fallbackCopy(url);
-            }
-        });
+    fileInput.addEventListener('change', (e) => setFile(e.target.files[0]));
+
+    ['dragenter', 'dragover'].forEach((evt) =>
+        dropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropzone.classList.add('drag');
+        })
+    );
+
+    ['dragleave', 'drop'].forEach((evt) =>
+        dropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('drag');
+        })
+    );
+
+    dropzone.addEventListener('drop', (e) => {
+        const file = e.dataTransfer.files[0];
+        setFile(file);
     });
 
-    // EVENT LISTENER: Delete Canvas
-    document.querySelectorAll('.btn-icon-md3.danger').forEach(btn => {
-        btn.addEventListener('click', async function(e) {
-            e.stopPropagation();
-            const id = this.dataset.id;
-            const row = this.closest('tr');
-            const songName = row.querySelector('td:nth-child(4)')?.textContent || 'this song';
-            
-            if (confirm(`Delete the Canvas for "${songName.trim()}"?`)) {
-                try {
-                    const response = await fetch(`${API_BASE}/delete`, {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id })
-                    });
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        showMessage(uploadMessage, '✅ Canvas deleted successfully', 'success');
-                        setTimeout(() => hideMessage(uploadMessage), 3000);
-                        loadCanvasList();
-                    } else {
-                        showMessage(uploadMessage, '❌ ' + (data.error || 'Error deleting'), 'error');
-                    }
-                } catch (error) {
-                    showMessage(uploadMessage, '❌ Error deleting: ' + error.message, 'error');
-                }
-            }
-        });
-    });
-}
-
-// Fallback to copy URL
-function fallbackCopy(text) {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    textarea.style.left = '-9999px';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-        document.execCommand('copy');
-        showMessage(uploadMessage, '✅ URL copied to clipboard', 'success');
-        setTimeout(() => hideMessage(uploadMessage), 3000);
-    } catch (e) {
-        showMessage(uploadMessage, '❌ Could not copy URL', 'error');
-    }
-    document.body.removeChild(textarea);
-}
-
-// ============================================
-// EVENT LISTENER: Upload Canvas
-// ============================================
-form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-
-    const artist = artistInput.value.trim();
-    const album = albumInput.value.trim();
-    const song = songInput.value.trim(); // ✅ Now optional
-    const file = fileInput.files[0];
-
-    // ✅ Only artist, album, and file are required. Song is optional.
-    if (!artist || !album || !file) {
-        showMessage(uploadMessage, '❌ Artist, album, and file are required. Song is optional.', 'error');
-        return;
+    // ============================================================
+    // Form Validation
+    // ============================================================
+    function validateForm() {
+        uploadBtn.disabled = !(selectedFile && fArtist.value.trim());
     }
 
-    // Validate file type
-    if (!file.type.startsWith('video/')) {
-        showMessage(uploadMessage, '❌ File must be a video (MP4, WebM, etc.)', 'error');
-        return;
-    }
+    [fArtist, fAlbum, fSong].forEach((el) => el.addEventListener('input', validateForm));
 
-    // Validate size (maximum 6MB)
-    if (file.size > 6 * 1024 * 1024) {
-        showMessage(uploadMessage, '❌ File exceeds 6MB. Please compress the video.', 'error');
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('artist', artist);
-    formData.append('album', album);
-    if (song) {
-        formData.append('song', song); // Only if it has value
-    }
-    formData.append('video', file);
-
-    uploadBtn.disabled = true;
-    uploadBtn.innerHTML = '<ion-icon name="refresh-outline" class="animate-spin"></ion-icon> Uploading...';
-    showMessage(uploadMessage, '⏳ Uploading Canvas...', 'loading');
-
-    try {
-        const response = await fetch(`${API_BASE}/upload`, {
-            method: 'POST',
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            showMessage(uploadMessage, `✅ Canvas uploaded successfully!\nURL: ${data.url}`, 'success');
-            form.reset();
-            loadCanvasList();
-            document.querySelector('.list-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-            showMessage(uploadMessage, '❌ ' + (data.error || 'Error uploading Canvas'), 'error');
+    // ============================================================
+    // Upload
+    // ============================================================
+    uploadBtn.addEventListener('click', () => {
+        const base = normalizedBase();
+        if (!base || (base !== '/api' && !store.token)) {
+            showSnackbar('⚠️ Configure the server connection first', true);
+            settingsPanel.classList.add('open');
+            return;
         }
-    } catch (error) {
-        console.error('Connection error:', error);
-        showMessage(uploadMessage, '❌ Connection error: ' + error.message, 'error');
-    } finally {
-        uploadBtn.disabled = false;
-        uploadBtn.innerHTML = '<ion-icon name="cloud-upload-outline"></ion-icon> Upload Canvas';
-    }
-});
 
-// ============================================
-// INITIALIZE
-// ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    loadCanvasList();
-});
+        if (!selectedFile || !fArtist.value.trim()) return;
+
+        const form = new FormData();
+        form.append('artist', fArtist.value.trim());
+        form.append('album', fAlbum.value.trim());
+        form.append('song', fSong.value.trim());
+        form.append('file', selectedFile);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${base}/?action=upload`);
+        if (base !== '/api') {
+            xhr.setRequestHeader('Authorization', `Bearer ${store.token}`);
+        }
+
+        uploadBtn.disabled = true;
+        progressWrap.classList.add('show');
+        progressFill.style.width = '0%';
+        progressLabel.textContent = '⏳ Uploading… 0%';
+
+        xhr.upload.addEventListener('progress', (e) => {
+            if (!e.lengthComputable) return;
+            const pct = Math.round((e.loaded / e.total) * 100);
+            progressFill.style.width = pct + '%';
+            progressLabel.textContent = `⏳ Uploading… ${pct}%`;
+        });
+
+        xhr.onload = () => {
+            progressWrap.classList.remove('show');
+            let ok = false,
+                msg = null;
+            try {
+                const res = JSON.parse(xhr.responseText);
+                ok = res.success;
+                msg = res.message || null;
+            } catch (_) {
+                msg = `Server responded HTTP ${xhr.status} without valid JSON (Is Worker down or URL incorrect?)`;
+            }
+
+            if (xhr.status === 200 && ok) {
+                showSnackbar('✅ Canvas uploaded successfully to WormHole 🎉');
+                fArtist.value = '';
+                fAlbum.value = '';
+                fSong.value = '';
+                clearFile();
+                loadCatalog();
+            } else if (xhr.status === 401) {
+                showSnackbar('🔒 Incorrect upload token (check UPLOAD_TOKEN)', true);
+            } else if (xhr.status === 0) {
+                showSnackbar('🚫 Blocked by CORS or no connection — try "Test Connection" in Settings', true);
+            } else {
+                showSnackbar(msg || `Error uploading canvas (HTTP ${xhr.status})`, true);
+            }
+            validateForm();
+        };
+
+        xhr.onerror = () => {
+            progressWrap.classList.remove('show');
+            showSnackbar('🚫 Could not connect (CORS, network, or incorrect Worker URL)', true);
+            validateForm();
+        };
+
+        xhr.send(form);
+    });
+
+    // ============================================================
+    // Catalog
+    // ============================================================
+    let allCanvases = [];
+
+    skeletonGrid.innerHTML = skeletons(8);
+
+    async function loadCatalog() {
+        const base = normalizedBase();
+        if (!base) {
+            galleryContainer.innerHTML = emptyStateHtml(
+                '🔌 Configure connection',
+                'Enter the Worker URL to view the WormHole canvas catalog.'
+            );
+            totalCount.textContent = '—';
+            return;
+        }
+
+        galleryContainer.innerHTML = `<div class="grid">${skeletons(8)}</div>`;
+
+        try {
+            const res = await fetch(`${base}/?action=list`);
+            const data = await res.json();
+
+            if (!data.success) throw new Error(data.message || 'Invalid response');
+
+            allCanvases = data.data.canvases || [];
+            renderGallery(allCanvases);
+        } catch (err) {
+            galleryContainer.innerHTML = emptyStateHtml(
+                '❌ Could not load catalog',
+                err.message || 'Check the Worker URL and your connection.'
+            );
+            totalCount.textContent = '—';
+        }
+    }
+
+    function renderGallery(list) {
+        const count = list.length;
+        totalCount.textContent = `${count} canvas${count === 1 ? '' : 'es'}`;
+
+        if (count === 0) {
+            galleryContainer.innerHTML = emptyStateHtml(
+                '📭 No results',
+                'Try another artist or album, or upload the first canvas to WormHole.'
+            );
+            return;
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+
+        list.forEach((c) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const label = c.song && c.song.trim() ? c.song : (c.album || 'Full album');
+            card.innerHTML = `
+                <div class="card-media">
+                    <span class="badge-album">${c.song && c.song.trim() ? '🎵 Song' : '💿 Album'}</span>
+                    <video src="${escapeHtml(c.url)}" muted loop playsinline preload="metadata"></video>
+                    <div class="play-hint">
+                        <svg viewBox="0 0 24 24" fill="white">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="card-artist">${escapeHtml(c.artist)}</p>
+                    <p class="card-sub">${escapeHtml(label)}</p>
+                </div>
+            `;
+
+            const video = card.querySelector('video');
+            card.addEventListener('mouseenter', () => video.play().catch(() => {}));
+            card.addEventListener('mouseleave', () => {
+                video.pause();
+                video.currentTime = 0;
+            });
+            card.addEventListener('click', () => openModal(c));
+            grid.appendChild(card);
+        });
+
+        galleryContainer.innerHTML = '';
+        galleryContainer.appendChild(grid);
+    }
+
+    searchInput.addEventListener('input', (e) => {
+        const q = e.target.value.trim().toLowerCase();
+        if (!q) {
+            renderGallery(allCanvases);
+            return;
+        }
+        const filtered = allCanvases.filter((c) =>
+            (c.artist || '').toLowerCase().includes(q) ||
+            (c.album || '').toLowerCase().includes(q) ||
+            (c.song || '').toLowerCase().includes(q)
+        );
+        renderGallery(filtered);
+    });
+
+    refreshBtn.addEventListener('click', loadCatalog);
+
+    // ============================================================
+    // Modal
+    // ============================================================
+    function openModal(c) {
+        modalVideo.src = c.url;
+        modalArtist.textContent = c.artist;
+        const metaParts = [];
+        if (c.album) metaParts.push(`💿 ${c.album}`);
+        if (c.song) metaParts.push(`🎵 ${c.song}`);
+        modalMeta.textContent = metaParts.join(' · ') || 'No specific song';
+        modalAlbum.textContent = c.song ? `Album: ${c.album || 'No album'}` : 'Applies to the entire album';
+        modalOpenUrl.href = c.url;
+        modalBackdrop.classList.add('show');
+        modalVideo.play().catch(() => {});
+
+        modalCopyUrl.onclick = () => {
+            navigator.clipboard.writeText(c.url).then(() => showSnackbar('📋 URL copied to clipboard'));
+        };
+    }
+
+    function closeModal() {
+        modalBackdrop.classList.remove('show');
+        modalVideo.pause();
+        modalVideo.src = '';
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', (e) => {
+        if (e.target === modalBackdrop) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // ============================================================
+    // Init
+    // ============================================================
+    initWarning();
+
+    if (normalizedBase()) {
+        loadCatalog();
+    } else {
+        skeletonGrid.parentElement.innerHTML = emptyStateHtml(
+            '🔌 Configure connection',
+            'Enter the Worker URL and token to start managing WormHole canvases.'
+        );
+    }
+
+    // ============================================================
+    // Keyboard shortcut: Ctrl+Shift+D to toggle developer warning
+    // ============================================================
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+            e.preventDefault();
+            if (devWarning.style.display === 'none') {
+                devWarning.style.display = 'flex';
+                store.warningHidden = false;
+            } else {
+                devWarning.style.display = 'none';
+                store.warningHidden = true;
+            }
+        }
+    });
+
+    // ============================================================
+    // Auto-refresh catalog every 60 seconds
+    // ============================================================
+    if (normalizedBase()) {
+        setInterval(() => {
+            loadCatalog();
+            updateFooterTimestamp();
+        }, 60000);
+    }
+
+})();
